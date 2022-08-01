@@ -1,7 +1,13 @@
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-public class ControllerStart{
+public class ControllerStart {
+    int health;
+    int strength;
+    int dexterity;
+    int xp;
+    int gold;
+    String name;
     @FXML
     TextArea fightHistory;
     @FXML
@@ -28,12 +34,15 @@ public class ControllerStart{
     Button goToFight;
     @FXML
     Button goToSeller;
-    String name;
-    int health;
-    int strength;
-    int dexterity;
-    int xp;
-    int gold;
+    @FXML
+    Button goToMain;
+    @FXML
+    Button buyHealth;
+    @FXML
+    Button buyStrength;
+    @FXML
+    Button buyDexterity;
+
 
     public void addTextToTextArea(String str) {
         this.fightHistory.appendText(str);
@@ -56,11 +65,21 @@ public class ControllerStart{
             startMenuOff();
             MainMenuOn();
         } else if (l2 && nameHero.getLength() != 0) {
-            new Hero(nameHero.getText(), 100, 100, 100, 100, 50);
+            this.name = nameHero.getText();
+            this.health = 70;
+            this.strength = 70;
+            this.dexterity = 70;
+            this.xp = 70;
+            this.gold = 70;
             startMenuOff();
             MainMenuOn();
         } else if (l3 && nameHero.getLength() != 0) {
-            new Hero(nameHero.getText(), 50, 50, 50, 50, 0);
+            this.name = nameHero.getText();
+            this.health = 50;
+            this.strength = 50;
+            this.dexterity = 50;
+            this.xp = 50;
+            this.gold = 0;
             startMenuOff();
             MainMenuOn();
         } else attentionStartBoard.setContentText("Введи имя и выбери уровень!");
@@ -85,6 +104,10 @@ public class ControllerStart{
         nameHero.setVisible(true);
         levelArea.setVisible(true);
         nameArea.setVisible(true);
+        backToStartMenu.setVisible(false);
+        goToFight.setVisible(false);
+        goToSeller.setVisible(false);
+        resourceBoardOff();
     }
 
     public void MainMenuOn() {
@@ -93,39 +116,156 @@ public class ControllerStart{
         goToFight.setVisible(true);
         goToSeller.setVisible(true);
         resourceBoardOn();
+        fightOff();
+        goToMain.setVisible(false);
+        sellerOff();
     }
 
     public void MainMenuOff() {
         StartMenuOn();
-        backToStartMenu.setVisible(false);
-        goToFight.setVisible(false);
-        goToSeller.setVisible(false);
-        resourceBoardOff();
     }
 
     public void resourceBoardOn() {
         resourceBoard.setVisible(true);
-//        resourceBoard.setContentText("Воин: "+ Fighters().getName()
-//                + "\nздоровье: " + Hero.getXp()
-//                + "\nловкость: " + Hero.getDexterity()
-//                + "\nсила: " + Hero.getStrength()
-//                + "\nзолото: " + Hero.getGold()
-//        );
+        resourceBoard.setContentText("Воин: " + this.name
+                + "\nздоровье: " + this.health
+                + "\nловкость: " + this.dexterity
+                + "\nсила: " + this.strength
+                + "\nзолото: " + this.gold
+        );
     }
 
     public void resourceBoardOff() {
         resourceBoard.setVisible(false);
     }
 
-    public void fightOn() {
-//            MainMenuOff();
-        fightHistory.setText("GOO");
-        Fight.fight(new Hero(name, health, strength, dexterity, xp, gold),
-                new Skeleton("22", 22, 33, 44, 44, 44));
+    public void setFightHistory(TextArea fightHistory, String str) {
+        this.fightHistory = fightHistory;
+        addTextToTextArea(str);
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+        resourceBoardOn();
+    }
+
+    public void setStrength(int strength) {
+        this.strength = strength;
+        resourceBoardOn();
     }
 
 
+    public void setDexterity(int dexterity) {
+        this.dexterity = dexterity;
+        resourceBoardOn();
+    }
+
+    public void setXp(int xp) {
+        this.xp = xp;
+        resourceBoardOn();
+    }
+
+    public void setGold(int gold) {
+        this.gold = gold;
+        resourceBoardOn();
+    }
+
+    public void fightOn() {
+        backToStartMenu.setVisible(false);
+        fightHistory.setVisible(true);
+        goToFight.setVisible(false);
+        goToSeller.setVisible(false);
+
+        if (randomOpponent() == 1) {
+            Fight.fight(new Hero(name, health, strength, dexterity, xp, gold),
+                    new Skeleton("Скелет", 50, 10, 10, 100, 20));
+        } else {
+            Fight.fight(new Hero(name, health, strength, dexterity, xp, gold),
+                    new Goblin("Гоблин", 25, 20, 20, 100, 10));
+        }
+        goToMain.setVisible(true);
+    }
+
     public void fightOff() {
+        fightHistory.setVisible(false);
+    }
+
+    public void sellerOff() {
+        buyDexterity.setVisible(false);
+        buyHealth.setVisible(false);
+        buyStrength.setVisible(false);
+        attentionStartBoard.setVisible(false);
+    }
+
+    public void sellerOn() {
+        backToStartMenu.setVisible(false);
+        goToFight.setVisible(false);
+        goToSeller.setVisible(false);
+        goToMain.setVisible(true);
+        buyDexterity.setVisible(true);
+        buyHealth.setVisible(true);
+        buyStrength.setVisible(true);
+    }
+
+    public void buyResourcesDexterity() {
+        Seller seller = new Seller("Dexterity");
+    }
+
+    public void buyResourcesHealth() {
+        Seller seller = new Seller("Health");
+    }
+
+    public void buyResourcesStrength() {
+        Seller seller = new Seller("Strength");
+    }
+
+    public int randomOpponent() {
+        return 1 + (int) (Math.random() * 2);
+    }
+
+    public class Seller {
+        public String goods;
+
+        public Seller(String goods) {
+            this.goods = goods;
+            buyResources(goods);
+        }
+
+        void buyResources(String goods) {
+            switch (goods) {
+                case "Dexterity":
+                    if (gold >= 10) {
+                        dexterity += 10;
+                        gold -= 10;
+                        resourceBoardOn();
+                        break;
+                    } else {
+                        attentionStartBoard.setVisible(true);
+                        attentionStartBoard.setContentText("Недостаточно золота!");
+                    }
+                case "Health":
+                    if (gold >= 10) {
+                        health += 10;
+                        gold -= 10;
+                        resourceBoardOn();
+                        break;
+                    } else {
+                        attentionStartBoard.setVisible(true);
+                        attentionStartBoard.setContentText("Недостаточно золота!");
+                    }
+                case "Strength":
+                    if (gold >= 10) {
+                        health += 10;
+                        gold -= 10;
+                        resourceBoardOn();
+                        break;
+                    } else {
+                        attentionStartBoard.setVisible(true);
+                        attentionStartBoard.setContentText("Недостаточно золота!");
+                    }
+            }
+        }
+
     }
 
 }
