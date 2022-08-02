@@ -1,24 +1,27 @@
-import javafx.scene.control.TextArea;
-
 public class Fight {
-    static String string;
+    String string;
+    Fighters hero;
+    Fighters monster;
 
-    public static void fight(Fighters hero, Fighters monster) {
-        ControllerStart cs = new ControllerStart();
+    public Fight(Fighters hero, Fighters monster) {
+        this.hero = hero;
+        this.monster = monster;
+        fight(hero, monster);
+    }
+
+    public void fight(Fighters hero, Fighters monster) {
         Runnable runnable = () -> {
             int turn = 1;
             boolean isFightEnded = false;
             while (!isFightEnded) {
-                string = String.format("----Ход: " + turn + "----");
-                cs.setFightHistory(new TextArea(), string);
-                cs.addTextToTextArea(string);
+                ControllerStart.text.add(String.format("----Ход: " + turn + "----"));
                 if (turn++ % 2 != 0) {
                     isFightEnded = makeHit(monster, hero);
                 } else {
                     isFightEnded = makeHit(hero, monster);
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(1500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -28,36 +31,20 @@ public class Fight {
         thread.start();
     }
 
-    private static Boolean makeHit(Fighters defender, Fighters attacker) {
-        ControllerStart cs = new ControllerStart();
+    private Boolean makeHit(Fighters defender, Fighters attacker) {
         int hit = attacker.attack();
         int defenderHealth = defender.getHealthPoints() - hit;
         if (hit != 0) {
-            string = String.format("%s Нанес удар в %d единиц!", attacker.getName(), hit);
-//            ControllerStart.addTextToTextArea(string);
-            cs.addTextToTextArea(string);
-
-            string = String.format("У %s осталось %d единиц здоровья...", defender.getName(), defenderHealth);
-//            ControllerStart.addTextToTextArea(string);
-            cs.addTextToTextArea(string);
+            ControllerStart.text.add(String.format("%s Нанес удар в %d единиц! У %s осталось %d единиц здоровья...", attacker.getName(), hit, defender.getName(), defenderHealth));
 
         } else {
-            string = String.format("%s промахнулся!", attacker.getName());
-//            ControllerStart.addTextToTextArea(string);
-            cs.addTextToTextArea(string);
-
+            ControllerStart.text.add(String.format("%s промахнулся!", attacker.getName()));
         }
         if (defenderHealth <= 0 && defender instanceof Hero) {
-            string = "Извините, вы пали в бою...";
-//            ControllerStart.addTextToTextArea(string);
-            cs.addTextToTextArea(string);
-            cs.setHealth(0);
+            ControllerStart.text.add("Извините, вы пали в бою...");
             return true;
         } else if (defenderHealth <= 0) {
-            string = String.format("Враг повержен! Вы получаете %d опыт и %d золота", defender.getXp(), defender.getGold());
-            cs.addTextToTextArea(string);
-            cs.setGold(attacker.getGold() + defender.getGold());
-            cs.setXp(attacker.getXp() + defender.getXp());
+            ControllerStart.text.add(String.format("Враг повержен! Вы получаете %d опыт и %d золота", defender.getXp(), defender.getGold()));
             attacker.setXp(attacker.getXp() + defender.getXp());
             attacker.setGold(attacker.getGold() + defender.getGold());
             return true;

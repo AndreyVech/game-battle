@@ -65,6 +65,7 @@ public abstract class Fighters implements Fighter {
 
     public void setXp(int xp) {
         this.xp = xp;
+        ControllerStart.setXp(xp);
     }
 
     public int getGold() {
@@ -73,6 +74,7 @@ public abstract class Fighters implements Fighter {
 
     public void setGold(int gold) {
         this.gold = gold;
+        ControllerStart.setGold(xp);
     }
 
     private int getRandomValue() {

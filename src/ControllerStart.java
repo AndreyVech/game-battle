@@ -1,15 +1,22 @@
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import java.util.ArrayList;
+
 public class ControllerStart {
-    int health;
-    int strength;
-    int dexterity;
-    int xp;
-    int gold;
+
+    public static int xp;
+    public static int gold;
+    public static boolean t = true;
+    public static ArrayList text = new ArrayList();
+    public int health;
+    public int strength;
+    public int dexterity;
     String name;
     @FXML
     TextArea fightHistory;
+    @FXML
+    Button exit;
     @FXML
     Button startButton;
     @FXML
@@ -43,9 +50,36 @@ public class ControllerStart {
     @FXML
     Button buyDexterity;
 
+    public static void setXp(int inXp) {
+        xp = inXp;
+    }
 
-    public void addTextToTextArea(String str) {
-        this.fightHistory.appendText(str);
+    public static void setGold(int inGold) {
+        gold = inGold;
+    }
+
+
+    public void setFightHistory() {
+        Runnable runnable = () -> {
+            while (!t) {
+                int y = 0;
+                try {
+                    int x = text.size();
+                    if (x > y) {
+                        y++;
+                        String str = fightHistory.getText();
+                        fightHistory.setText(str + "\n" + String.valueOf(text.get(text.size()-1)));
+                    }
+                    Thread.sleep(1500);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        Thread thread1 = new Thread(runnable);
+        thread1.start();
     }
 
     public void startGame() {
@@ -57,29 +91,29 @@ public class ControllerStart {
 
         if (l1 && nameHero.getLength() != 0) {
             this.name = nameHero.getText();
-            this.health = 100;
-            this.strength = 100;
-            this.dexterity = 100;
-            this.xp = 100;
-            this.gold = 100;
+            this.health = 30;
+            this.strength = 20;
+            this.dexterity = 20;
+            xp = 20;
+            gold = 100;
             startMenuOff();
             MainMenuOn();
         } else if (l2 && nameHero.getLength() != 0) {
             this.name = nameHero.getText();
-            this.health = 70;
-            this.strength = 70;
-            this.dexterity = 70;
-            this.xp = 70;
-            this.gold = 70;
+            this.health = 30;
+            this.strength = 20;
+            this.dexterity = 20;
+            xp = 20;
+            gold = 50;
             startMenuOff();
             MainMenuOn();
         } else if (l3 && nameHero.getLength() != 0) {
             this.name = nameHero.getText();
-            this.health = 50;
-            this.strength = 50;
-            this.dexterity = 50;
-            this.xp = 50;
-            this.gold = 0;
+            this.health = 30;
+            this.strength = 20;
+            this.dexterity = 20;
+            xp = 20;
+            gold = 0;
             startMenuOff();
             MainMenuOn();
         } else attentionStartBoard.setContentText("Введи имя и выбери уровень!");
@@ -131,7 +165,8 @@ public class ControllerStart {
                 + "\nздоровье: " + this.health
                 + "\nловкость: " + this.dexterity
                 + "\nсила: " + this.strength
-                + "\nзолото: " + this.gold
+                + "\nзолото: " + gold
+                + "\nопыт: " + xp
         );
     }
 
@@ -139,55 +174,29 @@ public class ControllerStart {
         resourceBoard.setVisible(false);
     }
 
-    public void setFightHistory(TextArea fightHistory, String str) {
-        this.fightHistory = fightHistory;
-        addTextToTextArea(str);
-    }
-
-    public void setHealth(int health) {
-        this.health = health;
-        resourceBoardOn();
-    }
-
-    public void setStrength(int strength) {
-        this.strength = strength;
-        resourceBoardOn();
-    }
-
-
-    public void setDexterity(int dexterity) {
-        this.dexterity = dexterity;
-        resourceBoardOn();
-    }
-
-    public void setXp(int xp) {
-        this.xp = xp;
-        resourceBoardOn();
-    }
-
-    public void setGold(int gold) {
-        this.gold = gold;
-        resourceBoardOn();
-    }
-
     public void fightOn() {
-        backToStartMenu.setVisible(false);
+        resourceBoardOff();
         fightHistory.setVisible(true);
+        fightHistory.setWrapText(true);
+        backToStartMenu.setVisible(false);
         goToFight.setVisible(false);
         goToSeller.setVisible(false);
-
         if (randomOpponent() == 1) {
-            Fight.fight(new Hero(name, health, strength, dexterity, xp, gold),
+            new Fight(new Hero(name, health, strength, dexterity, xp, gold),
                     new Skeleton("Скелет", 50, 10, 10, 100, 20));
         } else {
-            Fight.fight(new Hero(name, health, strength, dexterity, xp, gold),
+            new Fight(new Hero(name, health, strength, dexterity, xp, gold),
                     new Goblin("Гоблин", 25, 20, 20, 100, 10));
         }
         goToMain.setVisible(true);
+        setFightHistory();
     }
 
     public void fightOff() {
+        t = false;
+//        fightHistory.clear();
         fightHistory.setVisible(false);
+        System.out.println(text);
     }
 
     public void sellerOff() {
@@ -208,19 +217,23 @@ public class ControllerStart {
     }
 
     public void buyResourcesDexterity() {
-        Seller seller = new Seller("Dexterity");
+        new Seller("Dexterity");
     }
 
     public void buyResourcesHealth() {
-        Seller seller = new Seller("Health");
+        new Seller("Health");
     }
 
     public void buyResourcesStrength() {
-        Seller seller = new Seller("Strength");
+        new Seller("Strength");
     }
 
     public int randomOpponent() {
         return 1 + (int) (Math.random() * 2);
+    }
+
+    public void exit() {
+        System.exit(1);
     }
 
     public class Seller {
@@ -265,9 +278,13 @@ public class ControllerStart {
                     }
             }
         }
-
     }
 
+//    public void init(){
+//        String[] passArray = new String[10000];
+//        Arrays.fill(passArray, "a");
+//        fightHistory.setContentText(String.valueOf(passArray));
+//    }
 }
 
 
